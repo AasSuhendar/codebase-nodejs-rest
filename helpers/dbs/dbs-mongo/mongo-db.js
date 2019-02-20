@@ -10,30 +10,47 @@ var conn
 
 
 // -------------------------------------------------
-// DB Get Connect Function
+// DB Get Connection Function
 async function getConnection() {
- let dbURI = 'mongodb://' + config.schema.get('db.username') + ':' + config.schema.get('db.password') + '@' +
-             config.schema.get('db.host') + ':' + config.schema.get('db.port') + '/' +
-             config.schema.get('db.name')
+  if (conn === undefined) {
+    let dbURI
 
-  const dbOptions = {
-    poolSize: 50,    
-    keepAlive: 15000,
-    socketTimeoutMS: 15000,
-    connectTimeoutMS: 15000,
-    useNewUrlParser: true
-  }
+    if (config.schema.get('db.username') !== '' || config.schema.get('db.password') !== '') {
+      dbURI = 'mongodb://' + config.schema.get('db.host') + ':' + config.schema.get('db.port')
+    } else {
+      dbURI = 'mongodb://' + config.schema.get('db.username') + ':' + config.schema.get('db.password') + '@' +
+              config.schema.get('db.host') + ':' + config.schema.get('db.port')
+    }
 
-  try {
-    conn = await mongo.connect(dbURI, dbOptions)
+    const dbOptions = {
+      poolSize: 50,    
+      keepAlive: 15000,
+      socketTimeoutMS: 15000,
+      connectTimeoutMS: 15000,
+      useNewUrlParser: true
+    }
 
-    if (! await getPing()) {
-      log.send('mongo-db-get-connection').error("Cannot Get Mongo Database Ping")
+    try {
+      if (dbURI !== undefined) {
+        let client = await mongo.connect(dbURI, dbOptions)
+        
+        conn = client.db(config.schema.get('db.name'))
+        if (! await getPing()) {
+          log.send('mongo-db-get-connection').error('Cannot Get Mongo Database Ping')
+          process.exit(1)
+        }
+
+        return conn
+      } else {
+        log.send('mongo-db-get-connection').error('Cannot Get Mongo Database URI')
+        process.exit(1)
+      }
+    } catch(err) {
+      log.send('mongo-db-get-connection').error(common.strToTitleCase(err.message))
       process.exit(1)
     }
-  } catch(err) {
-    log.send('mongo-db-get-connection').error("Cannot Get Mongo Database Connection")
-    process.exit(1)
+  } else {
+    return conn
   }
 }
 
@@ -43,14 +60,15 @@ async function getConnection() {
 async function getPing() {
   try {
     if (conn !== undefined) {
-      let status = await conn.db.admin().command({ ping: 1 })
-
-      if (status.ok === 1) {
+      let dbAdmin = conn.admin()  
+      let dbStatus = await dbAdmin.ping()
+      
+      if (dbStatus.ok === 1) {
         return true
       }
     }
 
-    log.send('mongo-db-get-ping').error("Cannot Get Mongo Database Connection")
+    log.send('mongo-db-get-ping').error('Cannot Get Mongo Database Connection')
     return false
   } catch(err) {
     log.send('mongo-db-get-ping').error(common.strToTitleCase(err.message))
@@ -62,7 +80,6 @@ async function getPing() {
 // -------------------------------------------------
 // Export Module
 module.exports = {
-  conn,
   getConnection,
   getPing
 }

@@ -25,42 +25,94 @@ var schema = convict({
       env: 'NODE_LOG_LEVEL'
     }
   },
+  jwt: {
+    expired: {
+      doc: 'JWT Authentication Expiration',
+      format: String,
+      default: '1d',
+      env: 'JWT_EXPIRED'
+    }
+  },
   db: {
     driver: {
       doc: 'Database Driver',
       format: String,
       default: '',
-      env: "DB_DRIVER"
+      env: 'DB_DRIVER'
     },
     host: {
       doc: 'Database Host',
       format: '*',
       default: '',
-      env: "DB_HOST"
+      env: 'DB_HOST'
     },
     port: {
-      doc: "Database Port",
+      doc: 'Database Port',
       format: 'port',
       default: '',
-      env: "DB_PORT"
+      env: 'DB_PORT'
     },
     username: {
-      doc: "Database Username",
+      doc: 'Database Username',
       format: String,
       default: '',
-      env: "DB_USERNAME"
+      env: 'DB_USERNAME'
     },
     password: {
-      doc: "Database Password",
+      doc: 'Database Password',
       format: String,
       default: '',
-      env: "DB_PASSWORD"
+      env: 'DB_PASSWORD'
     },
     name: {
-      doc: "Database Name",
+      doc: 'Database Name',
       format: String,
       default: '',
-      env: "DB_NAME"
+      env: 'DB_NAME'
+    }
+  },
+  store: {
+    endPoint: {
+      doc: 'Storage Endpoint',
+      format: String,
+      default: '',
+      env: 'STORE_ENDPOINT'
+    },
+    accessKey: {
+      doc: 'Storage Access Key',
+      format: String,
+      default: '',
+      env: 'STORE_ACCESS_KEY'
+    },
+    secretKey: {
+      doc: 'Storage Secret Key',
+      format: String,
+      default: '',
+      env: 'STORE_SECRET_KEY'
+    },
+    region: {
+      doc: 'Storage Region',
+      format: String,
+      default: 'us-east-1',
+      env: 'STORE_REGION'
+    },
+    bucket: {
+      doc: 'Storage Bucket',
+      format: String,
+      default: '',
+      env: 'STORE_BUCKET'
+    },
+    port: {
+      doc: 'Storage Port',
+      format: 'port',
+      default: '',
+      env: 'STORE_PORT'
+    },
+    useSSL: {
+      doc: 'Storage Use SSL',
+      format: Boolean,
+      default: false,
+      env: 'STORE_USE_SSL'
     }
   }
 })
