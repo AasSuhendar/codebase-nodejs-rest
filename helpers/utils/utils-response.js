@@ -18,6 +18,31 @@ function resData(res, data) {
   res.status(200).json({
     status: true,
     code: 200,
+    message: 'Success',
+    data
+  })
+}
+
+
+// -------------------------------------------------
+// Created Response Function
+function resCreated(res, data) {
+  res.status(201).json({
+    status: true,
+    code: 201,
+    message: 'Success',
+    data
+  })
+}
+
+
+// -------------------------------------------------
+// Updated Response Function
+function resUpdated(res, data) {
+  res.status(204).json({
+    status: true,
+    code: 204,
+    message: 'Success',
     data
   })
 }
@@ -41,7 +66,7 @@ function resBadRequest(res, msg) {
 // -------------------------------------------------
 // Internal Server Error Response Function
 function resInternalError(res, msg) {
-	// Set Default Message
+  // Set Default Message
   msg = msg !== undefined ? msg : "Internal Server Error"
   
   res.status(500).json({
@@ -55,12 +80,15 @@ function resInternalError(res, msg) {
 
 // -------------------------------------------------
 // Not Found Response Function
-function resNotFound(res) {
+function resNotFound(res, msg) {
+  // Set Default Message
+  msg = msg !== undefined ? msg : "Not Found"
+
   res.status(400).json({
     status: false,
     code: 400,
     message: 'Not Found',
-    error: 'Not Found'
+    error: msg
   })
 }
 
@@ -90,6 +118,8 @@ function resAuthenticate(res) {
 module.exports = {
   resOK,
   resData,
+  resCreated,
+  resUpdated,
   resBadRequest,
   resInternalError,
   resNotFound,
