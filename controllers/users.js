@@ -4,16 +4,13 @@ const response = require('../helpers/utils/utils-response')
 
 
 // -------------------------------------------------
-// Index Auth Function
+// Index User Function
 function index(req, res) {
-  let data = JSON.parse(req.body)
-
-  if (data.username.length === 0 || data.password.legth === 0) {
-    response.resBadRequest(res, 'Invalid Authorizaton')
-    return
-  }
-
-  response.resSuccessData(res, {token: jwt.getToken({username: data.username})})
+  // Parse JWT Claims from Header
+  let dataClaims = jwt.getClaims(res.get('X-JWT-Claims'))
+  
+  // Response with JWT Claims
+  response.resSuccessData(res, dataClaims.data)
 }
 
 

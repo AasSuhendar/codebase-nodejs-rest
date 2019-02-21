@@ -1,12 +1,13 @@
 const mongo = require('mongodb').MongoClient
 const config = require('../../../config')
+
 const common = require('../../utils/utils-common')
 const log = require('../../utils/utils-logger')
 
 
 // -------------------------------------------------
 // DB Connection Variable
-var conn
+var session, conn
 
 
 // -------------------------------------------------
@@ -32,9 +33,15 @@ async function getConnection() {
 
     try {
       if (dbURI !== undefined) {
-        let client = await mongo.connect(dbURI, dbOptions)
-        
-        conn = client.db(config.schema.get('db.name'))
+        session = await mongo.connect(dbURI, dbOptions)
+
+        if (! session.isConnected()) {
+          log.send('mongo-db-get-connection').error('Cannot Get Mongo Database Connection')
+          process.exit(1)
+        }
+
+        conn = session.db(config.schema.get('db.name'))
+
         if (! await getPing()) {
           log.send('mongo-db-get-connection').error('Cannot Get Mongo Database Ping')
           process.exit(1)
@@ -78,8 +85,24 @@ async function getPing() {
 
 
 // -------------------------------------------------
+// DB Close Connection Function
+function closeConnection(){
+  try {
+    if (session !== undefined) {
+      session.close()
+    }
+
+    log.send('mongo-db-close-connection').error('Successfully Close Mongo Database Session')
+  } catch(err) {
+    log.send('mongo-db-close-connection').error(common.strToTitleCase(err.message))
+  }
+}
+
+
+// -------------------------------------------------
 // Export Module
 module.exports = {
   getConnection,
-  getPing
+  getPing,
+  closeConnection
 }
