@@ -4,20 +4,21 @@
  * Module dependencies.
  */
 
+const http = require('http')
+const cluster = require('cluster')
+const numCPUs = require('os').cpus().length
+
 const app = require('../app')
 const config = require('../config')
 
-const debug = require('debug')('frame-nodejs:server')
-const http = require('http')
-
-const cluster = require('cluster')
-const numCPUs = require('os').cpus().length
+const common = require('../helpers/utils/utils-common')
+const log = require('../helpers/utils/utils-logger')
 
 /**
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(config.schema.get('port'))
+const port = normalizePort(config.schema.get('server.port'))
 app.set('port', port)
 
 /**
@@ -31,13 +32,21 @@ const server = http.createServer(app)
  */
 
 if (cluster.isMaster) {
+  log.send('http-server').info('Server Master Started at PID ' + process.pid)
+
   for (let i = 0; i < numCPUs; i++) {
     cluster.fork()
   }
+
+  cluster.on('exit', (worker, code, signal) => {
+    log.send('http-server').warn('Server Worker Started at PID ' + worker.process.pid + ' Has Died, Restarting Server Worker')
+    cluster.fork()
+  })
 } else {
-  server.listen(port)
-  server.on('error', onError)
+  server.listen(port, config.schema.get('server.address'))
+
   server.on('listening', onListening)
+  server.on('error', onError)
 }
 
 /**
@@ -63,27 +72,25 @@ function normalizePort(val) {
  */
 
 function onError(error) {
+  let addr = server.address()
+
   if (error.syscall !== 'listen') {
-    throw error
+    log.send('http-server').error(common.strToTitleCase(error.message))
   }
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port
-
-  // handle specific listen errors with friendly messages
+  // Handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(bind + ' requires elevated privileges')
-      process.exit(1)
+      log.send('http-server').error('Server Worker at PID ' + process.pid + ' in Address ' + addr.address + ':' + addr.port + ' Require Elevated Privileges')
       break
     case 'EADDRINUSE':
-      console.error(bind + ' is already in use')
-      process.exit(1)
+      log.send('http-server').error('Server Worker at PID ' + process.pid + ' in Address ' + addr.address + ':' + addr.port + ' is Already in Use')
       break
     default:
-      throw error
+      log.send('http-server').error(common.strToTitleCase(error.message))
   }
+
+  process.exit(1)
 }
 
 /**
@@ -91,9 +98,6 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address()
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port
-  debug('Listening on ' + bind)
+  let addr = server.address()
+  log.send('http-server').info('Server Worker Started at PID ' + process.pid + ' Listening on ' + addr.address + ':' + addr.port)
 }

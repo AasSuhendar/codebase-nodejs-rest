@@ -1,19 +1,21 @@
 const response = require('../utils/utils-response')
+const log = require('../utils/utils-logger')
 
 
 // -------------------------------------------------
 // Auth Basic Middleware Function
-function authBasic(req, res, next) {
+function auth(req, res, next) {
   // Check HTTP Header Authorization Section
   // The First Authorization Section Should Contain "Basic "
   if (!req.headers.authorization || req.headers.authorization.indexOf('Basic ') === -1) {
+    log.send('http-access').warn('Unauthorized Method ' + req.method + ' at URI ' + req.url)
     response.resAuthenticate(res)
     return
   }
 
   // The Second Authorization Section Should Be The Credentials Payload
   // But We Should Decode it First From Base64 Encoding
-  let authPayload = Buffer.from(req.headers.authorization.split(' ')[1], 'base64').toString('ascii')
+  let authPayload = Buffer.from(req.headers.authorization.split(' ')[1], 'base64').toString('utf8')
 
   // Split Decoded Authorization Payload Into Username and Password Credentials
   let authCredentials = authPayload.split(':')
@@ -21,7 +23,8 @@ function authBasic(req, res, next) {
   // Check Credentials Section
   // It Should Have 2 Section, Username and Password
   if (authCredentials.length !== 2) {
-    response.resUnauthorized(res)
+    log.send('http-access').warn('Unauthorized Method ' + req.method + ' at URI ' + req.url)
+    response.resBadRequest(res)
     return
   }
 
@@ -35,4 +38,6 @@ function authBasic(req, res, next) {
 
 // -------------------------------------------------
 // Export Module
-module.exports = authBasic
+module.exports = {
+  auth
+}
