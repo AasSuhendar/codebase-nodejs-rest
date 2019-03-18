@@ -3,19 +3,41 @@ const convict = require('convict')
 
 
 // -------------------------------------------------
-// Configuration Schema Variable
-var schema = convict({
+// Configuration Schema Constant
+const schema = convict({
   env: {
     doc: 'The Application Environment',
     format: ['dev', 'prod', 'test'],
     default: 'dev',
     env: 'NODE_ENV'
   },
-  port: {
-    doc: 'The Application Port to Listen',
-    format: 'port',
-    default: 3000,
-    env: 'NODE_PORT'
+  server: {
+    address: {
+      doc: 'The Application Address to Listen',
+      format: 'ipaddress',
+      default: '0.0.0.0',
+      env: 'NODE_SERVER_ADDRESS'
+    },
+    port: {
+      doc: 'The Application Port to Listen',
+      format: 'port',
+      default: 3000,
+      env: 'NODE_SERVER_PORT'
+    },
+    upload: {
+      path: {
+        doc: 'The Application Upload Path',
+        format: String,
+        default: './public/uploads',
+        env: 'NODE_SERVER_UPLOAD_PATH'
+      },
+      limit: {
+        doc: 'The Application Upload Limit Size',
+        format: Number,
+        default: 8,
+        env: 'NODE_SERVER_UPLOAD_LIMIT'
+      }
+    }
   },
   log: {
     level: {
@@ -24,6 +46,12 @@ var schema = convict({
       default: 'info',
       env: 'NODE_LOG_LEVEL'
     }
+  },
+  timezone: {
+    doc: 'The Application Timezone',
+    format: String,
+    default: 'UTC',
+    env: 'NODE_TIMEZONE'
   },
   jwt: {
     expired: {
@@ -72,6 +100,12 @@ var schema = convict({
     }
   },
   store: {
+    driver: {
+      doc: 'Storage Driver',
+      format: String,
+      default: '',
+      env: 'STORE_DRIVER'
+    },
     endPoint: {
       doc: 'Storage Endpoint',
       format: String,
@@ -105,7 +139,7 @@ var schema = convict({
     port: {
       doc: 'Storage Port',
       format: 'port',
-      default: '',
+      default: 443,
       env: 'STORE_PORT'
     },
     useSSL: {
