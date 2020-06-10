@@ -1,4 +1,4 @@
-# Frame-NodeJS for REST API in NodeJS
+# Codebase for REST API in NodeJS
 
 This codebase help a new NodeJS developer in developing a REST API using NodeJS.
 This codebase included with some pre bundle service or helper like authentication, logging, and predefined configuration.
@@ -21,6 +21,14 @@ Optional package:
 
 Below is the instructions to make this codebase running:
 * Pull the codebase from this repository
+```
+git clone -b master https://github.com/dimaskiddo/codebase-nodejs-rest.git
+cd codebase-nodejs-rest
+```
+* Remove any related git configuration
+```
+rm -rf .git
+```
 * Run following command to pull dependecies package
 ```
 npm install
@@ -54,4 +62,3 @@ See also the list of [contributors](https://github.com/dimaskiddo/codebase-nodej
 ## Annotation
 
 You can seek more information for the npm command parameters in the [package.json](https://raw.githubusercontent.com/dimaskiddo/codebase-nodejs-rest/master/package.json)
->>>>>>> f686c10c4f8173644dac525d3a97d3249d1ae6f1

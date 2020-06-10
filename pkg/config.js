@@ -3,7 +3,8 @@ const convict = require('convict')
 
 const package = require('../package.json')
 
-
+convict.addFormat(require('convict-format-with-validator').ipaddress)
+ 
 // -------------------------------------------------
 // Configuration Schema Constant
 const schema = convict({

@@ -16,7 +16,8 @@
     "url": "http://travistidwell.com/jsencrypt/demo/"
   },
   "dependencies": {
-    "convict": "^4.4.1",
+    "convict": "^6.0.0",
+    "convict-format-with-validator": "^6.0.0",
     "dotenv": "^6.2.0",
     "express": "~4.16.0",
     "helmet": "^3.21.2",
