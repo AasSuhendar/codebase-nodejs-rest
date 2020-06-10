@@ -1,0 +1,39 @@
+{
+  "env": "production",
+  "workers": 0,
+  "server": {
+    "address": "0.0.0.0",
+    "port": 3000,
+    "upload": {
+      "path": "./misc/public/uploads",
+      "limit": 8,
+      "max": 10
+    },
+    "keys": {
+      "private": "./misc/keys/private.key",
+      "public": "./misc/keys/public.key"
+    }
+  },
+  "log": {
+    "level" : "info"
+  },
+  "timezone": "Asia/Jakarta",
+  "jwt": {
+    "audience": "1f3730ca-776a-4420-ad17-cf0acb31d10c",
+    "expired": "1d",
+    "refresh": "90d"
+  },
+  "db": {
+    "driver": "",
+    "host": "127.0.0.1",
+    "port": 27017,
+    "username": "user",
+    "password": "password",
+    "name": "db"
+  },
+  "store": {
+    "driver": "",
+    "accessKey": "",
+    "secretKey": ""
+  }
+}

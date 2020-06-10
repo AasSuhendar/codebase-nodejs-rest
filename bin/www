@@ -8,11 +8,11 @@ const http = require('http')
 const cluster = require('cluster')
 const numCPUs = require('os').cpus().length
 
-const app = require('../app')
-const config = require('../config')
+const common = require('../pkg/utils/common')
+const log = require('../pkg/utils/logger')
 
-const common = require('../helpers/utils/utils-common')
-const log = require('../helpers/utils/utils-logger')
+const config = require('../pkg/config')
+const app = require('../pkg/app')
 
 /**
  * Get port from environment and store in Express.
@@ -34,8 +34,17 @@ const server = http.createServer(app)
 if (cluster.isMaster) {
   log.send('http-server').info('Server Master Started at PID ' + process.pid)
 
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork()
+  if (config.schema.get('workers') == 0) {
+    config.schema.set('workers', numCPUs)
+  }
+
+  if (config.schema.get('workers') <= numCPUs) {
+    for (let i = 0; i < config.schema.get('workers'); i++) {
+      cluster.fork()
+    }
+  } else {
+    log.send('http-server').error('Error! Worker number is greater than maximum CPUs')
+    process.exit(1)
   }
 
   cluster.on('exit', (worker, code, signal) => {
