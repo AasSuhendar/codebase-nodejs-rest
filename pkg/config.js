@@ -1,5 +1,7 @@
 const env = require('dotenv')
+
 const convict = require('convict')
+const convictValidator = require('convict-format-with-validator')
 
 const package = require('../package.json')
 
@@ -7,6 +9,7 @@ convict.addFormat(require('convict-format-with-validator').ipaddress)
  
 // -------------------------------------------------
 // Configuration Schema Constant
+convict.addFormat(convictValidator.ipaddress)
 const schema = convict({
   env: {
     doc: 'The Application Environment',
@@ -193,7 +196,7 @@ const schema = convict({
       default: '',
       env: 'STORE_DRIVER'
     },
-    endpoint: {
+    endPoint: {
       doc: 'Storage Endpoint',
       format: String,
       default: '',
@@ -243,6 +246,7 @@ const schema = convict({
     }
   }
 })
+
 schema.loadFile('./misc/configs/' + schema.get('env')  + '.json')
 schema.validate({allowed: 'strict'})
 env.config()

@@ -1,4 +1,5 @@
 const express = require('express')
+const expressUA = require('express-useragent')
 const helmet = require('helmet')
 
 const config = require('./config')
@@ -13,6 +14,7 @@ const response = require('./utils/response')
 const log = require('./utils/logger')
 
 const app = express()
+const ctx = 'http-server'
 
 
 // -------------------------------------------------
@@ -47,17 +49,25 @@ app.use(express.urlencoded({
   limit: config.schema.get('server.upload.limit') + 'mb'
 }))
 
+app.use(expressUA.express())
+
 app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', config.schema.get('server.cors.origins'))
   res.header('Access-Control-Allow-Methods', config.schema.get('server.cors.methods'))
   res.header('Access-Control-Allow-Headers', config.schema.get('server.cors.headers'))
-  next()
-})
 
-app.use(function (req, res, next) {
   if (req.url !== '/favicon.ico') {
-    log.send('http-access').info('Access Method ' + req.method + ' at URI ' + req.url)
+    const logData = {
+      ip: (req.headers['x-forwarded-for'] || '').split(',')[0] || req.socket.remoteAddress,
+      method: req.method,
+      url: req.url,
+      system: req.useragent.platform + '/' + req.useragent.os,
+      agent: req.useragent.browser + '/' + req.useragent.version
+    }
+  
+    log.info(ctx, logData)
   }
+
   next()
 })
 
@@ -72,13 +82,31 @@ app.use('/', require('../internal/routes/index'))
 app.get('/favicon.ico', (req, res) => res.status(204))
 
 app.use(function (req, res) {
-  log.send('http-access').warn('Not Found Method ' + req.method + ' at URI ' + req.url)
-  response.resNotFound(res, 'Not Found Method ' + req.method + ' at URI ' + req.url)
+  const logData = {
+    ip: (req.headers['x-forwarded-for'] || '').split(',')[0] || req.socket.remoteAddress,
+    method: req.method,
+    url: req.url,
+    system: req.useragent.platform + '/' + req.useragent.os,
+    agent: req.useragent.browser + '/' + req.useragent.version,
+    error: 'Not Found'
+  }
+
+  log.warn(ctx, logData)
+  response.resNotFound(res, logData.error)
 })
 
 app.use(function (err, req, res, next) {
-  log.send('http-access').error(common.strToTitleCase(err.message))
-  response.resInternalError(res, common.strToTitleCase(err.message))
+  const logData = {
+    ip: (req.headers['x-forwarded-for'] || '').split(',')[0] || req.socket.remoteAddress,
+    method: req.method,
+    url: req.url,
+    system: req.useragent.platform + '/' + req.useragent.os,
+    agent: req.useragent.browser + '/' + req.useragent.version,
+    error: common.strToTitleCase(err.message)
+  }
+
+  log.error(ctx, logData)
+  response.resInternalError(res, logData.error)
 })
 
 

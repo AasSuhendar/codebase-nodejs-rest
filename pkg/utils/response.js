@@ -25,7 +25,7 @@ function writeResponseData(res, statusCode, msg, data) {
 // Write Error Response Function
 function writeResponseError(res, statusCode, msg, err) {
   res.status(statusCode).json({
-    status: true,
+    status: false,
     code: statusCode,
     message: msg,
     error: err
@@ -97,7 +97,7 @@ function resNotFound(res, err) {
   err = err !== undefined ? err : 'Not Found'
 
   // Write Response
-  writeResponseError(res, 400, 'Not Found', err)
+  writeResponseError(res, 404, 'Not Found', err)
 }
 
 

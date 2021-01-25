@@ -4,11 +4,22 @@ const log = require('../utils/logger')
 
 // -------------------------------------------------
 // Auth Basic Middleware Function
-function auth(req, res, next) {
+async function auth(req, res, next) {
+  let ctx = 'auth-basic'
+
   // Check HTTP Header Authorization Section
   // The First Authorization Section Should Contain "Basic "
   if (!req.headers.authorization || req.headers.authorization.indexOf('Basic ') === -1) {
-    log.send('http-access').warn('Unauthorized Method ' + req.method + ' at URI ' + req.url)
+    const logData = {
+      ip: (req.headers['x-forwarded-for'] || '').split(',')[0] || req.socket.remoteAddress,
+      method: req.method,
+      url: req.url,
+      system: req.useragent.platform + '/' + req.useragent.os,
+      agent: req.useragent.browser + '/' + req.useragent.version,
+      error: 'Unauthorized'
+    }
+  
+    log.warn(ctx, logData)
     response.resAuthenticate(res)
     return
   }
@@ -22,9 +33,19 @@ function auth(req, res, next) {
 
   // Check Credentials Section
   // It Should Have 2 Section, Username and Password
-  if (authCredentials.length !== 2) {
-    log.send('http-access').warn('Unauthorized Method ' + req.method + ' at URI ' + req.url)
-    response.resBadRequest(res)
+  // And It Should Not Empty
+  if (authCredentials[0] === '' ||  authCredentials[1] === '') {
+    const logData = {
+      ip: (req.headers['x-forwarded-for'] || '').split(',')[0] || req.socket.remoteAddress,
+      method: req.method,
+      url: req.url,
+      system: req.useragent.platform + '/' + req.useragent.os,
+      agent: req.useragent.browser + '/' + req.useragent.version,
+      error: 'Invalid Authorization'
+    }
+
+    log.warn(ctx, logData)
+    response.resBadRequest(res, logData.error)
     return
   }
 

@@ -7,26 +7,27 @@ const jwt = require('../../pkg/auth/jwt')
 
 const store = require('../../pkg/utils/store')
 
-const modIndex = require('../modules/index/controllers/index')
-const modAuth = require('../modules/auth/controllers/index')
-const modUsers = require('../modules/users/controllers/index')
+const ctlIndex = require('../modules/index/controllers/index')
+const ctlAuth = require('../modules/auth/controllers/index')
+const ctlUsers = require('../modules/users/controllers/index')
+const ctlStores = require('../modules/stores/controllers/index')
 
 const router = express.Router()
 
 
 // -------------------------------------------------
 // Route List
-router.get('/', modIndex.index)
-router.get('/health', modIndex.health)
+router.get('/', ctlIndex.index)
+router.get('/health', ctlIndex.health)
 
-router.get('/auth', basic.auth, modAuth.index)
-router.get('/auth/refresh', jwt.authRefresh, modAuth.refresh)
+router.get('/auth', basic.auth, ctlAuth.index)
+router.get('/auth/refresh', jwt.refresh, ctlAuth.refresh)
 
-router.get('/users', jwt.authClaims, modUsers.index)
+router.get('/users', jwt.auth, ctlUsers.index)
 
-router.post('/users/upload/:bucketName', jwt.authClaims, store.storeToLocal.single('file'), modUsers.uploadFile)
-router.post('/users/upload/:bucketName/multi', jwt.authClaims, store.storeToLocal.array('file', config.schema.get('server.upload.max')), modUsers.uploadMultiFile)
-router.get('/users/upload/:bucketName/link', jwt.authClaims, modUsers.getUploadedFile)
+router.post('/stores/:bucketName', jwt.auth, store.storeToLocal.single('file'), ctlStores.storeFile)
+router.post('/stores/:bucketName/bulk', jwt.auth, store.storeToLocal.array('file', config.schema.get('server.upload.max')), ctlStores.storeFileBulk)
+router.get('/stores/:bucketName/link', jwt.auth, ctlStores.storeLink)
 
 
 // -------------------------------------------------
